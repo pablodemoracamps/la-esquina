@@ -999,28 +999,39 @@
     let rec = null;
     let grabando = false;
     let transcripcion = '';
+    let timerMic = null;
 
     const empezar = (e) => {
       e.preventDefault();
       if (grabando) return;
       transcripcion = '';
+      inputChat.value = '';
       rec = new SR();
       rec.lang = 'es-ES';
       rec.interimResults = true;
-      rec.continuous = true;
+      rec.continuous = false;
       rec.onresult = ev => {
-        let t = '';
-        for (let i = 0; i < ev.results.length; i++) t += ev.results[i][0].transcript;
-        transcripcion = t;
-        inputChat.value = t;
+        let final = '';
+        let interim = '';
+        for (let i = 0; i < ev.results.length; i++) {
+          if (ev.results[i].isFinal) {
+            final += ev.results[i][0].transcript;
+          } else {
+            interim += ev.results[i][0].transcript;
+          }
+        }
+        transcripcion = (final + interim).trim();
+        inputChat.value = transcripcion;
       };
       rec.onend = () => {
+        clearTimeout(timerMic);
         grabando = false;
         btnMic.classList.remove('grabando');
         btnMic.textContent = '🎙';
         if (transcripcion.trim()) enviar();
       };
       rec.onerror = ev => {
+        clearTimeout(timerMic);
         grabando = false;
         btnMic.classList.remove('grabando');
         btnMic.textContent = '🎙';
@@ -1031,7 +1042,9 @@
       grabando = true;
       btnMic.classList.add('grabando');
       btnMic.textContent = '●';
+      timerMic = setTimeout(parar, 15000);
       try { rec.start(); } catch (err) {
+        clearTimeout(timerMic);
         grabando = false;
         btnMic.classList.remove('grabando');
         btnMic.textContent = '🎙';

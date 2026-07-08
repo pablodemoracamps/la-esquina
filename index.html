@@ -836,16 +836,41 @@
       'Nota: {id,text}.\n\n' +
       'MENSAJE: "' + mensajeUsuario.replace(/"/g, '\\"') + '"\n\n' +
       'Responde SOLO JSON:\n' +
-      '{"reply":"texto breve","actions":[{"type":"add_task|update_task|remove_task|toggle_task|add_note|remove_note","date":"AAAA-MM-DD",...}]}\n\n' +
-      'Reglas: actions vacío si solo conversa. Tareas simples: ejecútalas directo. Rutinas/entrenamientos: PASO 1 propón en reply sin actions; PASO 2 al confirmar, ejecuta con detail. Asigna cat por contenido. En detail usa \\n, no saltos reales. Ambiguo sin fecha: pregunta. Sé conciso.';
+      '{"reply":"texto breve","actions":[...]}\n\n' +
+      'Tipos de acción:\n' +
+      '- add_task: {type,date,text,cat,detail}\n' +
+      '- update_task: {type,date,id,text?,cat?,detail?}\n' +
+      '- remove_task / toggle_task: {type,date,id}\n' +
+      '- add_note: {type,date,text}\n' +
+      '- remove_note: {type,date,id}\n' +
+      '- repeat_task: {type,start,end,interval,text,cat,detail} — ÚSALO SIEMPRE para tareas en varios días. start/end en AAAA-MM-DD, interval=1 todos los días, 2 días alternos, 7 semanal. La app genera las copias.\n\n' +
+      'Reglas: actions vacío si solo conversa. Tareas simples: directo. Para VARIOS DÍAS usa SIEMPRE repeat_task (1 sola acción). Rutinas: PASO 1 propón en reply sin actions; PASO 2 al confirmar ejecuta. cat por contenido. detail con \\n no saltos reales. Sé conciso.';
   }
 
   function aplicarAcciones(acciones) {
     let cambios = 0;
     (acciones || []).forEach(a => {
       try {
-      if (!a || !a.date) return;
-      if (a.type === 'add_task' && a.text) {
+      if (!a) return;
+      if (a.type === 'repeat_task' && a.start && a.end && a.text) {
+        const intervalo = Math.max(1, parseInt(a.interval) || 1);
+        const d = new Date(a.start + 'T12:00:00');
+        const fin = new Date(a.end + 'T12:00:00');
+        while (d <= fin) {
+          const k = clave(d);
+          (datos.tasks[k] = datos.tasks[k] || []).push({
+            id: uid(),
+            text: String(a.text),
+            done: false,
+            cat: CATS.includes(a.cat) ? a.cat : 'otros',
+            detail: a.detail ? String(a.detail) : ''
+          });
+          cambios++;
+          d.setDate(d.getDate() + intervalo);
+        }
+      } else if (!a.date) {
+        return;
+      } else if (a.type === 'add_task' && a.text) {
         (datos.tasks[a.date] = datos.tasks[a.date] || []).push({
           id: uid(),
           text: String(a.text),
@@ -926,7 +951,7 @@
         },
         body: JSON.stringify({
           model: MODELO,
-          max_tokens: 800,
+          max_tokens: 1000,
           messages: [...historial, { role: 'user', content: construirPrompt(texto) }]
         })
       });

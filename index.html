@@ -553,8 +553,9 @@
   //  La sacas al crear el Worker: https://esquina-proxy.xxxx.workers.dev
   //  Aquí NO va ninguna clave: la clave vive escondida en Cloudflare.
   const PROXY_URL = 'https://pablodemora--763046f676d511f1a08d1607ee4eb77e.web.val.run';
-  //  Modelo. Por defecto Sonnet 5. Más barato: 'claude-haiku-4-5-20251001'
-  const MODELO = 'claude-sonnet-5';
+  //  Modelo. Haiku es rápido y barato — perfecto para comandos de calendario.
+  //  Para rutinas más elaboradas, cámbialo a: 'claude-sonnet-4-6'
+  const MODELO = 'claude-haiku-4-5-20251001';
   // ══════════════════════════════════════════════════════════════
 
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -807,43 +808,36 @@
   }
 
   function contextoCalendario() {
-    // Solo días con contenido, para no inflar el prompt
-    return JSON.stringify({ tareas: datos.tasks, notas: datos.notes });
+    // Solo enviar datos de los próximos 45 días para no sobrecargar el prompt
+    const hoy = new Date();
+    const limite = new Date(hoy);
+    limite.setDate(limite.getDate() + 45);
+    const inicio = new Date(hoy);
+    inicio.setDate(inicio.getDate() - 7);
+    const tareasRelevantes = {};
+    const notasRelevantes = {};
+    Object.keys(datos.tasks).forEach(k => {
+      const d = new Date(k + 'T12:00:00');
+      if (d >= inicio && d <= limite) tareasRelevantes[k] = datos.tasks[k];
+    });
+    Object.keys(datos.notes).forEach(k => {
+      const d = new Date(k + 'T12:00:00');
+      if (d >= inicio && d <= limite) notasRelevantes[k] = datos.notes[k];
+    });
+    return JSON.stringify({ tareas: tareasRelevantes, notas: notasRelevantes });
   }
 
   function construirPrompt(mensajeUsuario) {
     const hoyStr = clave(new Date());
-    return 'Eres el asistente de un calendario personal llamado "La Esquina". El usuario se llama Pablo y habla español.\n\n' +
-      'FECHA DE HOY: ' + hoyStr + '\n\n' +
-      'ESTADO ACTUAL DEL CALENDARIO (JSON, claves de fecha en formato AAAA-MM-DD):\n' +
-      contextoCalendario() + '\n\n' +
-      'Cada tarea tiene {id, text, done, cat, detail}. "cat" es su categoría: "deporte" (rojo), "boda" (blanco), "laboral" (verde) u "otros" (amarillo). "detail" es una anotación opcional con el desglose de la tarea (p. ej. las series de un entrenamiento). Cada nota tiene {id, text}.\n\n' +
-      'MENSAJE DEL USUARIO: "' + mensajeUsuario.replace(/"/g, '\\"') + '"\n\n' +
-      'Responde SOLO con un objeto JSON válido, sin markdown ni texto adicional, con esta estructura exacta:\n' +
-      '{\n' +
-      '  "reply": "tu respuesta conversacional en español, breve y directa",\n' +
-      '  "actions": [\n' +
-      '    {"type": "add_task", "date": "AAAA-MM-DD", "text": "...", "cat": "deporte|boda|laboral|otros", "detail": "anotación opcional"},\n' +
-      '    {"type": "update_task", "date": "AAAA-MM-DD", "id": "...", "text": "opcional", "cat": "opcional", "detail": "opcional"},\n' +
-      '    {"type": "remove_task", "date": "AAAA-MM-DD", "id": "..."},\n' +
-      '    {"type": "toggle_task", "date": "AAAA-MM-DD", "id": "..."},\n' +
-      '    {"type": "add_note", "date": "AAAA-MM-DD", "text": "..."},\n' +
-      '    {"type": "remove_note", "date": "AAAA-MM-DD", "id": "..."}\n' +
-      '  ]\n' +
-      '}\n\n' +
-      'Reglas:\n' +
-      '- "actions" puede estar vacío si el usuario solo pregunta o conversa.\n' +
-      '- Para borrar o marcar, usa los id exactos del estado actual.\n' +
-      '- Asigna "cat" según el contenido de la tarea; usa "otros" si hay duda.\n' +
-      '- Usa "text" como título corto y "detail" para desgloses largos (series de entrenamiento, pasos, listas). Para añadir o cambiar la anotación de una tarea existente, usa update_task.\n' +
-      '- Sé PROACTIVO con el contenido pero con CONFIRMACIÓN en dos pasos. Cuando Pablo pida un entrenamiento, una rutina o cualquier tarea con desglose:\n' +
-      '  PASO 1 (proponer): responde en "reply" con la rutina completa y concreta que propones (ejercicios, series, repeticiones, descansos), y pregúntale si la incorporas así o quiere cambios. En este paso "actions" debe ir VACÍO: aún no ejecutes nada.\n' +
-      '  PASO 2 (aplicar): cuando Pablo confirme ("vale", "adelante", "incorpórala", "perfecto") o pida ajustes, entonces sí ejecuta add_task/update_task con la versión final, rellenando "detail" con la rutina. Si pide ajustes, aplica la versión ya corregida.\n' +
-      '  Rellena tú mismo el contenido; NO le pidas a Pablo los detalles de la rutina. Pablo tiene experiencia en fitness (boxeo y fuerza), así que las rutinas pueden ser técnicas. Ejemplo de detail: "Calentamiento 10min\\nPress banca 4x8\\nDominadas 4x8\\nFondos 3x12\\nCore: plancha 3x1min\\nEstiramientos".\n' +
-      '- Para tareas simples y sin desglose (una cita, un recordatorio) NO hace falta el paso de confirmación: ejecútalas directamente.\n' +
-      '- MUY IMPORTANTE: dentro de los valores de texto del JSON nunca uses saltos de línea reales; escríbelos como \\n (sobre todo en "detail"). Sé conciso: líneas cortas.\n' +
-      '- Si el usuario pide algo ambiguo (sin fecha clara), pregunta en "reply" y no ejecutes acciones.\n' +
-      '- Sé conciso: es un chat de móvil.';
+    return 'Asistente del calendario "La Esquina". Usuario: Pablo (español, boxeador, experiencia en fitness).\n' +
+      'HOY: ' + hoyStr + '\n' +
+      'CALENDARIO (JSON, próximos 45 días):\n' + contextoCalendario() + '\n\n' +
+      'Tarea: {id,text,done,cat,detail}. cat: deporte|boda|laboral|otros. detail: anotación opcional.\n' +
+      'Nota: {id,text}.\n\n' +
+      'MENSAJE: "' + mensajeUsuario.replace(/"/g, '\\"') + '"\n\n' +
+      'Responde SOLO JSON:\n' +
+      '{"reply":"texto breve","actions":[{"type":"add_task|update_task|remove_task|toggle_task|add_note|remove_note","date":"AAAA-MM-DD",...}]}\n\n' +
+      'Reglas: actions vacío si solo conversa. Tareas simples: ejecútalas directo. Rutinas/entrenamientos: PASO 1 propón en reply sin actions; PASO 2 al confirmar, ejecuta con detail. Asigna cat por contenido. En detail usa \\n, no saltos reales. Ambiguo sin fecha: pregunta. Sé conciso.';
   }
 
   function aplicarAcciones(acciones) {
@@ -924,7 +918,7 @@
         return;
       }
       // Historial reciente para contexto conversacional + prompt con estado del calendario
-      const historial = datos.chat.slice(-12, -1).map(m => ({ role: m.role, content: m.content }));
+      const historial = datos.chat.slice(-6, -1).map(m => ({ role: m.role, content: m.content }));
       const respuesta = await fetch(PROXY_URL, {
         method: 'POST',
         headers: {
@@ -932,7 +926,7 @@
         },
         body: JSON.stringify({
           model: MODELO,
-          max_tokens: 1200,
+          max_tokens: 800,
           messages: [...historial, { role: 'user', content: construirPrompt(texto) }]
         })
       });
@@ -977,7 +971,10 @@
       render();
     } catch (err) {
       cargando.remove();
-      pintarMsg('sistema', 'Error de conexión. Comprueba tu red e inténtalo de nuevo.');
+      const msg = err.name === 'TypeError' || err.message.includes('fetch')
+        ? 'Timeout: el servidor tardó demasiado. Intenta un comando más corto.'
+        : 'Error de conexión. Comprueba tu red e inténtalo de nuevo.';
+      pintarMsg('sistema', msg);
       console.error(err);
     } finally {
       btnEnviar.disabled = false;

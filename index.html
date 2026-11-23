@@ -474,6 +474,41 @@
   }
   .titulo-esquina { display: flex; align-items: center; gap: 12px; min-width: 0; }
   .logo-esquina { width: 46px; height: auto; flex-shrink: 0; filter: drop-shadow(0 2px 6px rgba(226,59,78,.35)); }
+
+  /* ── Horas y herramientas del plan ───────────────── */
+  .tarea .hora {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: var(--oro);
+    margin-right: 8px;
+    white-space: nowrap;
+  }
+  .herramientas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .herramientas button {
+    background: var(--tinta);
+    border: 1px solid var(--tinta-3);
+    border-radius: 10px;
+    color: var(--lona);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    padding: 12px 6px;
+    line-height: 1.25;
+  }
+  .herramientas button:active { transform: scale(.96); }
+  .herramientas-aviso {
+    font-size: 12px;
+    color: var(--lona-suave);
+    line-height: 1.5;
+    margin-top: 8px;
+    min-height: 18px;
+  }
 </style>
 </head>
 <body>
@@ -523,6 +558,17 @@
       <input id="input-nota" type="text" placeholder="Nueva nota…" autocomplete="off" />
       <button id="btn-nota" aria-label="Añadir nota">+</button>
     </div>
+  </div>
+
+  <div>
+    <div class="seccion-titulo">Plan y avisos</div>
+    <div class="herramientas">
+      <button id="btn-importar">⬆ Importar plan</button>
+      <button id="btn-exportar">⬇ Copia de seguridad</button>
+      <button id="btn-ics">🔔 Alarmas al móvil</button>
+    </div>
+    <div class="herramientas-aviso" id="herramientas-aviso"></div>
+    <input type="file" id="archivo-importar" accept=".json,application/json" hidden />
   </div>
 </section>
 
@@ -581,6 +627,39 @@
     return div.innerHTML;
   }
 
+  // ── Horas y alarmas de las tareas ─────────────────
+  // Una tarea puede tener: time "HH:MM", end "HH:MM" y alarm (minutos de antelación, 0 = a la hora).
+  const RE_HORA = /^([01]?\d|2[0-3]):([0-5]\d)$/;
+  function normHora(v) {
+    if (typeof v !== 'string') return '';
+    const m = v.trim().match(RE_HORA);
+    return m ? String(m[1]).padStart(2, '0') + ':' + m[2] : '';
+  }
+  function camposHora(a) {
+    const o = {};
+    const time = normHora(a.time);
+    if (time) {
+      o.time = time;
+      const end = normHora(a.end);
+      if (end && end > time) o.end = end;
+      const al = parseInt(a.alarm, 10);
+      if (!isNaN(al) && al >= 0 && al <= 240) o.alarm = al;
+    }
+    return o;
+  }
+  // Copia ordenada por hora; las tareas sin hora van al final y conservan su orden.
+  function ordenar(lista) {
+    return lista.map((t, i) => ({ t, i })).sort((x, y) => {
+      const a = x.t.time || '99:99';
+      const b = y.t.time || '99:99';
+      return a < b ? -1 : a > b ? 1 : x.i - y.i;
+    }).map(x => x.t);
+  }
+  function etiquetaHora(t) {
+    if (!t.time) return '';
+    return t.time + (t.end ? '–' + t.end : '') + (typeof t.alarm === 'number' ? ' 🔔' : '');
+  }
+
   // ── Persistencia (almacenamiento local del navegador) ─────────
   function cargar() {
     try {
@@ -636,7 +715,7 @@
       num.textContent = d;
       btn.appendChild(num);
 
-      const tareas = datos.tasks[k] || [];
+      const tareas = ordenar(datos.tasks[k] || []);
       const notas = datos.notes[k] || [];
       if (notas.length) {
         const p = document.createElement('span');
@@ -672,7 +751,7 @@
     lt.innerHTML = '';
     ln.innerHTML = '';
 
-    const tareas = datos.tasks[seleccionado] || [];
+    const tareas = ordenar(datos.tasks[seleccionado] || []);
     const notas = datos.notes[seleccionado] || [];
 
     if (!tareas.length) lt.innerHTML = '<div class="vacio-msg">Sin tareas. Añade una abajo o pídesela a La Esquina.</div>';
@@ -683,7 +762,7 @@
       el.innerHTML =
         '<button class="check" aria-label="Marcar tarea">' + (t.done ? '✓' : '') + '</button>' +
         '<div class="cuerpo-tarea">' +
-          '<span class="texto">' + esc(t.text) + (t.detail ? ' <span class="chevron">▾</span>' : '') + '</span>' +
+          '<span class="texto">' + (t.time ? '<span class="hora">' + esc(etiquetaHora(t)) + '</span>' : '') + esc(t.text) + (t.detail ? ' <span class="chevron">▾</span>' : '') + '</span>' +
           (t.detail ? '<div class="detalle">' + esc(t.detail) + '</div>' : '') +
         '</div>' +
         '<button class="borrar" aria-label="Borrar tarea">✕</button>';
@@ -772,9 +851,9 @@
     esquina.classList.add('abierto');
     if (!agendaMostrada) {
       const k = clave(new Date());
-      const pend = (datos.tasks[k] || []).filter(t => !t.done);
+      const pend = ordenar(datos.tasks[k] || []).filter(t => !t.done);
       if (pend.length) {
-        pintarMsg('sistema', '📋 Hoy tienes ' + pend.length + (pend.length === 1 ? ' tarea pendiente: ' : ' tareas pendientes: ') + pend.map(t => t.text).join(' · '));
+        pintarMsg('sistema', '📋 Hoy tienes ' + pend.length + (pend.length === 1 ? ' tarea pendiente: ' : ' tareas pendientes: ') + pend.map(t => (t.time ? t.time + ' ' : '') + t.text).join(' · '));
       }
       agendaMostrada = true;
     }
@@ -808,17 +887,25 @@
   }
 
   function contextoCalendario() {
-    // Solo enviar datos de los próximos 45 días para no sobrecargar el prompt
+    // Solo enviar datos de las próximas 3 semanas (con el plan semanal cargado, más sería demasiado prompt)
     const hoy = new Date();
     const limite = new Date(hoy);
-    limite.setDate(limite.getDate() + 45);
+    limite.setDate(limite.getDate() + 21);
     const inicio = new Date(hoy);
-    inicio.setDate(inicio.getDate() - 7);
+    inicio.setDate(inicio.getDate() - 3);
     const tareasRelevantes = {};
     const notasRelevantes = {};
     Object.keys(datos.tasks).forEach(k => {
       const d = new Date(k + 'T12:00:00');
-      if (d >= inicio && d <= limite) tareasRelevantes[k] = datos.tasks[k];
+      if (d >= inicio && d <= limite) {
+        // Versión compacta: sin 'detail' largo ni campos internos
+        tareasRelevantes[k] = ordenar(datos.tasks[k]).map(t => {
+          const o = { id: t.id, text: t.text, done: t.done, cat: t.cat };
+          if (t.time) { o.time = t.time; if (t.end) o.end = t.end; if (typeof t.alarm === 'number') o.alarm = t.alarm; }
+          if (t.detail) o.detail = t.detail.length > 80 ? t.detail.slice(0, 80) + '…' : t.detail;
+          return o;
+        });
+      }
     });
     Object.keys(datos.notes).forEach(k => {
       const d = new Date(k + 'T12:00:00');
@@ -831,19 +918,19 @@
     const hoyStr = clave(new Date());
     return 'Asistente del calendario "La Esquina". Usuario: Pablo (español, boxeador, experiencia en fitness).\n' +
       'HOY: ' + hoyStr + '\n' +
-      'CALENDARIO (JSON, próximos 45 días):\n' + contextoCalendario() + '\n\n' +
-      'Tarea: {id,text,done,cat,detail}. cat: deporte|boda|laboral|otros. detail: anotación opcional.\n' +
+      'CALENDARIO (JSON, próximas 3 semanas):\n' + contextoCalendario() + '\n\n' +
+      'Tarea: {id,text,done,cat,detail,time,end,alarm}. cat: deporte|boda|laboral|otros. detail: anotación opcional. time/end: hora de inicio y fin "HH:MM" (opcionales). alarm: minutos de antelación del aviso en el móvil (0 = a la hora; solo si hay time).\n' +
       'Nota: {id,text}.\n\n' +
       'MENSAJE: "' + mensajeUsuario.replace(/"/g, '\\"') + '"\n\n' +
       'Responde SOLO JSON:\n' +
       '{"reply":"texto breve","actions":[...]}\n\n' +
       'Tipos de acción:\n' +
-      '- add_task: {type,date,text,cat,detail}\n' +
-      '- update_task: {type,date,id,text?,cat?,detail?}\n' +
+      '- add_task: {type,date,text,cat,detail,time?,end?,alarm?}\n' +
+      '- update_task: {type,date,id,text?,cat?,detail?,time?,end?,alarm?}\n' +
       '- remove_task / toggle_task: {type,date,id}\n' +
       '- add_note: {type,date,text}\n' +
       '- remove_note: {type,date,id}\n' +
-      '- repeat_task: {type,start,end,interval,text,cat,detail} — ÚSALO SIEMPRE para tareas en varios días. start/end en AAAA-MM-DD, interval=1 todos los días, 2 días alternos, 7 semanal. La app genera las copias.\n\n' +
+      '- repeat_task: {type,start,end,interval,text,cat,detail,time?,endTime?,alarm?} — OJO: aquí "end" es la fecha final y la hora de fin va en "endTime". ÚSALO SIEMPRE para tareas en varios días. start/end en AAAA-MM-DD, interval=1 todos los días, 2 días alternos, 7 semanal. La app genera las copias.\n\n' +
       'Reglas: actions vacío si solo conversa. Tareas simples: directo. Para VARIOS DÍAS usa SIEMPRE repeat_task (1 sola acción). Rutinas: PASO 1 propón en reply sin actions; PASO 2 al confirmar ejecuta. cat por contenido. detail con \\n no saltos reales. Sé conciso.';
   }
 
@@ -863,7 +950,8 @@
             text: String(a.text),
             done: false,
             cat: CATS.includes(a.cat) ? a.cat : 'otros',
-            detail: a.detail ? String(a.detail) : ''
+            detail: a.detail ? String(a.detail) : '',
+            ...camposHora({ time: a.time, end: a.endTime, alarm: a.alarm })
           });
           cambios++;
           d.setDate(d.getDate() + intervalo);
@@ -876,7 +964,8 @@
           text: String(a.text),
           done: false,
           cat: CATS.includes(a.cat) ? a.cat : 'otros',
-          detail: a.detail ? String(a.detail) : ''
+          detail: a.detail ? String(a.detail) : '',
+          ...camposHora(a)
         });
         cambios++;
       } else if (a.type === 'update_task' && a.id && datos.tasks[a.date]) {
@@ -886,6 +975,19 @@
           if (CATS.includes(a.cat)) t.cat = a.cat;
           if (a.detail !== undefined && a.detail !== null) t.detail = String(a.detail);
           if (typeof a.done === 'boolean') t.done = a.done;
+          if (a.time !== undefined) {
+            // Cambiar o quitar la hora; al quitarla se limpian también fin y alarma
+            const previo = { end: t.end, alarm: t.alarm };
+            delete t.time; delete t.end; delete t.alarm;
+            Object.assign(t, camposHora({
+              time: a.time,
+              end: a.end !== undefined ? a.end : previo.end,
+              alarm: a.alarm !== undefined ? a.alarm : previo.alarm
+            }));
+          } else if (a.alarm !== undefined && t.time) {
+            const al = parseInt(a.alarm, 10);
+            if (!isNaN(al) && al >= 0 && al <= 240) t.alarm = al; else delete t.alarm;
+          }
           cambios++;
         }
       } else if (a.type === 'remove_task' && a.id && datos.tasks[a.date]) {
@@ -1082,6 +1184,153 @@
     btnMic.addEventListener('pointerleave', parar);
     btnMic.addEventListener('contextmenu', e => e.preventDefault());
   }
+
+  // ── Plan y avisos: importar, copia de seguridad y alarmas (.ics) ──
+  const avisoEl = document.getElementById('herramientas-aviso');
+  function aviso(txt) { avisoEl.textContent = txt; }
+
+  function descargar(nombre, contenido, tipo) {
+    const blob = new Blob([contenido], { type: tipo });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nombre;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+
+  // Copia de seguridad: todo el calendario (sin el chat)
+  document.getElementById('btn-exportar').addEventListener('click', () => {
+    const copia = { app: 'la-esquina', version: 1, tasks: datos.tasks, notes: datos.notes };
+    descargar('la-esquina-copia-' + clave(new Date()) + '.json', JSON.stringify(copia, null, 1), 'application/json');
+    aviso('Copia descargada. Guárdala en un sitio seguro (Drive, por ejemplo).');
+  });
+
+  // Importar: añade lo que falta. Las tareas con src "plan" se sustituyen por día,
+  // así que volver a importar un plan corregido no duplica nada y no toca tus tareas manuales.
+  function importarDatos(obj) {
+    if (!obj || typeof obj !== 'object' || (typeof obj.tasks !== 'object' && typeof obj.notes !== 'object')) {
+      throw new Error('El archivo no tiene el formato de La Esquina.');
+    }
+    let nuevas = 0, notasNuevas = 0;
+    const tasks = obj.tasks || {};
+    const notes = obj.notes || {};
+    Object.keys(tasks).forEach(fecha => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !Array.isArray(tasks[fecha])) return;
+      const entrantes = tasks[fecha].filter(t => t && t.text);
+      if (entrantes.some(t => t.src === 'plan') && datos.tasks[fecha]) {
+        datos.tasks[fecha] = datos.tasks[fecha].filter(t => t.src !== 'plan');
+        if (!datos.tasks[fecha].length) delete datos.tasks[fecha];
+      }
+      const existentes = datos.tasks[fecha] || [];
+      entrantes.forEach(t => {
+        if (t.id && existentes.some(x => x.id === t.id)) return;
+        const cat = CATS.includes(t.cat) ? t.cat : 'otros';
+        const nueva = {
+          id: t.id ? String(t.id) : uid(),
+          text: String(t.text),
+          done: !!t.done,
+          cat: cat,
+          detail: t.detail ? String(t.detail) : '',
+          ...camposHora(t)
+        };
+        if (t.src === 'plan') nueva.src = 'plan';
+        (datos.tasks[fecha] = datos.tasks[fecha] || []).push(nueva);
+        nuevas++;
+      });
+    });
+    Object.keys(notes).forEach(fecha => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !Array.isArray(notes[fecha])) return;
+      notes[fecha].forEach(n => {
+        if (!n || !n.text) return;
+        const ya = (datos.notes[fecha] || []).some(x => x.text === n.text);
+        if (ya) return;
+        (datos.notes[fecha] = datos.notes[fecha] || []).push({ id: uid(), text: String(n.text) });
+        notasNuevas++;
+      });
+    });
+    guardar();
+    render();
+    return { nuevas, notasNuevas };
+  }
+
+  const inputArchivo = document.getElementById('archivo-importar');
+  document.getElementById('btn-importar').addEventListener('click', () => inputArchivo.click());
+  inputArchivo.addEventListener('change', () => {
+    const f = inputArchivo.files && inputArchivo.files[0];
+    if (!f) return;
+    const lector = new FileReader();
+    lector.onload = () => {
+      try {
+        const r = importarDatos(JSON.parse(lector.result));
+        aviso('✓ Importado: ' + r.nuevas + ' tareas' + (r.notasNuevas ? ' y ' + r.notasNuevas + ' notas' : '') + '.');
+      } catch (e) {
+        aviso('No he podido importar: ' + (e.message || 'archivo no válido') + ' No se ha cambiado nada.');
+      }
+      inputArchivo.value = '';
+    };
+    lector.onerror = () => { aviso('No he podido leer el archivo.'); inputArchivo.value = ''; };
+    lector.readAsText(f);
+  });
+
+  // Alarmas: archivo .ics con todos los bloques con hora desde hoy en adelante
+  function icsTexto(t) {
+    return String(t).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+  }
+  function icsPlegar(linea) {
+    // Las líneas de un .ics no deben pasar de ~75 caracteres; se continúan con un espacio
+    const trozos = [];
+    let resto = linea;
+    while (resto.length > 60) { trozos.push(resto.slice(0, 60)); resto = ' ' + resto.slice(60); }
+    trozos.push(resto);
+    return trozos.join('\r\n');
+  }
+  function icsFecha(fecha, hora) {
+    return fecha.replace(/-/g, '') + 'T' + hora.replace(':', '') + '00';
+  }
+  function sumarMinutos(hora, mins) {
+    const [h, m] = hora.split(':').map(Number);
+    const tot = Math.min(h * 60 + m + mins, 23 * 60 + 59);
+    return String(Math.floor(tot / 60)).padStart(2, '0') + ':' + String(tot % 60).padStart(2, '0');
+  }
+  function generarICS() {
+    const desde = clave(new Date());
+    const ahora = new Date();
+    const sello = ahora.getUTCFullYear() + String(ahora.getUTCMonth() + 1).padStart(2, '0') + String(ahora.getUTCDate()).padStart(2, '0') +
+      'T' + String(ahora.getUTCHours()).padStart(2, '0') + String(ahora.getUTCMinutes()).padStart(2, '0') + String(ahora.getUTCSeconds()).padStart(2, '0') + 'Z';
+    const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//La Esquina//ES', 'CALSCALE:GREGORIAN', 'X-WR-CALNAME:La Esquina'];
+    let n = 0;
+    Object.keys(datos.tasks).sort().forEach(fecha => {
+      if (fecha < desde) return;
+      ordenar(datos.tasks[fecha]).forEach(t => {
+        if (!t.time || t.done) return;
+        // Horas "flotantes" (sin zona): el móvil las interpreta en su hora local.
+        const fin = t.end || sumarMinutos(t.time, 60);
+        L.push('BEGIN:VEVENT');
+        L.push('UID:' + t.id + '@la-esquina');
+        L.push('DTSTAMP:' + sello);
+        L.push('DTSTART:' + icsFecha(fecha, t.time));
+        L.push('DTEND:' + icsFecha(fecha, fin));
+        L.push(icsPlegar('SUMMARY:' + icsTexto(t.text)));
+        if (t.detail) L.push(icsPlegar('DESCRIPTION:' + icsTexto(t.detail)));
+        if (typeof t.alarm === 'number') {
+          L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsTexto(t.text), 'TRIGGER:-PT' + t.alarm + 'M', 'END:VALARM');
+        }
+        L.push('END:VEVENT');
+        n++;
+      });
+    });
+    L.push('END:VCALENDAR');
+    return { texto: L.join('\r\n') + '\r\n', n };
+  }
+  document.getElementById('btn-ics').addEventListener('click', () => {
+    const r = generarICS();
+    if (!r.n) { aviso('No hay tareas con hora desde hoy en adelante. Importa primero el plan.'); return; }
+    descargar('la-esquina-alarmas.ics', r.texto, 'text/calendar');
+    aviso('Archivo con ' + r.n + ' bloques descargado. Ábrelo desde las descargas del móvil para añadirlo al calendario.');
+  });
 
   cargar();
 })();

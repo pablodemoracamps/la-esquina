@@ -21,6 +21,7 @@
     --cuerda: #e23b4e;
     --oro: #e8b664;
     --verde: #5fb27a;
+    --azul: #5aa0e6;
     --radio: 14px;
     --display: 'Anton', sans-serif;
     --cuerpo: 'Instrument Sans', sans-serif;
@@ -65,7 +66,7 @@
   }
   h1 {
     font-family: var(--display);
-    font-size: clamp(40px, 13vw, 58px);
+    font-size: clamp(32px, 10vw, 52px);
     line-height: 0.95;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -147,10 +148,8 @@
   .chip.mas { background: none; color: var(--lona-suave); padding: 0 3px; }
   .chip.hecha { opacity: .4; text-decoration: line-through; }
   .cat-deporte { background: var(--cuerda); color: #fff; }
-  .cat-boda { background: var(--lona); color: var(--tinta); }
-  .cat-laboral { background: var(--verde); color: var(--tinta); }
+  .cat-laboral { background: var(--azul); color: var(--tinta); }
   .cat-otros { background: var(--oro); color: var(--tinta); }
-  .dia.seleccionado .cat-boda { outline: 1px solid var(--tinta-3); }
 
   .leyenda {
     display: flex;
@@ -175,7 +174,7 @@
     flex: 1;
     background: var(--tinta-2);
     border-radius: var(--radio) var(--radio) 0 0;
-    padding: 18px 18px 110px;
+    padding: 18px 18px 120px;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -233,8 +232,7 @@
   .tarea .texto, .nota .texto { flex: 1; word-break: break-word; }
   .nota { border-left: 3px solid var(--oro); }
   .tarea.b-deporte { border-left: 3px solid var(--cuerda); }
-  .tarea.b-boda { border-left: 3px solid var(--lona); }
-  .tarea.b-laboral { border-left: 3px solid var(--verde); }
+  .tarea.b-laboral { border-left: 3px solid var(--azul); }
   .tarea.b-otros { border-left: 3px solid var(--oro); }
   .tarea .cuerpo-tarea { flex: 1; min-width: 0; }
   .tarea .chevron { color: var(--lona-suave); font-size: 12px; }
@@ -291,30 +289,7 @@
   }
   .fila-añadir button:active { filter: brightness(.85); }
 
-  /* ── Botón La Esquina ───────────────────────────── */
-  .boton-esquina {
-    position: fixed;
-    bottom: 18px;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    width: fit-content;
-    background: var(--cuerda);
-    color: #fff;
-    font-family: var(--display);
-    font-size: 17px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 14px 30px;
-    border-radius: 999px;
-    box-shadow: 0 6px 24px rgba(226, 59, 78, .45);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    z-index: 40;
-  }
-  .boton-esquina:active { transform: scale(.96); }
-  .campana { font-size: 18px; }
+  /* (El botón de La Esquina vive ahora en la barra inferior: ver 'Barra inferior' más abajo) */
 
   /* ── Chat La Esquina ────────────────────────────── */
   .esquina-overlay {
@@ -509,10 +484,254 @@
     margin-top: 8px;
     min-height: 18px;
   }
+  /* ══════════════════════════════════════════════════
+     MI DÍA · dirección visual
+     Cartel de boxeo nocturno: fondo tinta, rojo cuerda, oro y azul laboral.
+     Lo memorable: la tarjeta de "ahora" es el reloj de la ronda, con cuenta atrás
+     y cuerda de progreso; el resto se mantiene callado.
+     Paleta por categoría (--rgb): deporte rojo, laboral azul, otros oro.
+     Espaciado: 4/8/12/16 px. Rejilla de hora: 72 px por hora.
+     ══════════════════════════════════════════════════ */
+  [hidden] { display: none !important; }
+  .vista { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+  #vista-dia { padding-bottom: 104px; }
+  .c-deporte { --rgb: 226, 59, 78; }
+  .c-laboral { --rgb: 90, 160, 230; }
+  .c-otros { --rgb: 232, 182, 100; }
+
+  .dia-sup { font-size: 14px; font-weight: 600; color: var(--oro); letter-spacing: .3px; margin-bottom: 2px; }
+  .nav-mes .txt { width: auto; padding: 0 14px; font-size: 14px; font-weight: 700; }
+
+  /* Reloj de la ronda (fijo arriba al hacer scroll) */
+  .ahora-caja {
+    position: sticky; top: 0; z-index: 20;
+    padding: 6px 14px 14px;
+    background: linear-gradient(var(--tinta) 76%, rgba(19, 26, 34, 0));
+  }
+  .ahora {
+    background: var(--tinta-2);
+    border-radius: 14px;
+    border-left: 4px solid rgb(var(--rgb, 200, 194, 180));
+    padding: 12px 70px 12px 16px;
+    min-height: 76px;
+    display: flex; flex-direction: column; justify-content: center; gap: 8px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .35);
+  }
+  .ah-fila { display: flex; align-items: center; gap: 14px; }
+  .ah-cuenta {
+    flex: none;
+    font-family: var(--display);
+    font-size: 38px; line-height: 1; letter-spacing: 1px;
+    color: var(--lona);
+    font-variant-numeric: tabular-nums;
+    min-width: 112px;
+  }
+  .ah-cuenta.ah-espera { color: var(--lona-suave); }
+  .ah-info { min-width: 0; }
+  .ah-nombre {
+    font-family: var(--display);
+    font-size: 19px; line-height: 1.1; letter-spacing: 1px; text-transform: uppercase;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ah-rango { font-size: 13px; color: var(--lona-suave); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ah-cuerda { height: 4px; border-radius: 4px; background: var(--tinta-3); overflow: hidden; }
+  .ah-cuerda i { display: block; height: 100%; border-radius: 4px; background: rgb(var(--rgb, 232, 182, 100)); transition: width 1s linear; }
+  .ah-sig { font-size: 13px; color: var(--lona-suave); line-height: 1.3; }
+  .ah-resumen { font-size: 15px; color: var(--lona-suave); line-height: 1.4; }
+  .ah-resumen b { color: var(--lona); font-weight: 700; }
+  .dia-nuevo {
+    position: absolute; top: 18px; right: 24px;
+    width: 46px; height: 46px; border-radius: 12px;
+    background: var(--cuerda); color: #fff;
+    font-size: 28px; line-height: 1; font-weight: 600;
+    display: grid; place-items: center;
+    box-shadow: 0 4px 14px rgba(226, 59, 78, .4);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .dia-nuevo:active { transform: scale(.92); }
+  @media (hover: hover) { .dia-nuevo:hover { transform: rotate(90deg) scale(1.06); box-shadow: 0 6px 20px rgba(226, 59, 78, .6); } }
+
+  .sin-hora { padding: 0 14px 12px; }
+
+  /* Línea de tiempo */
+  .linea { position: relative; margin: 2px 14px 0; }
+  .l-hora { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid rgba(255, 255, 255, .07); }
+  .l-hora span {
+    position: absolute; top: -8px; left: 0; width: 42px;
+    font-size: 11px; font-weight: 600; color: var(--lona-suave);
+    background: var(--tinta); font-variant-numeric: tabular-nums;
+  }
+  .l-bloques { position: absolute; left: 48px; right: 0; top: 0; bottom: 0; pointer-events: none; }
+  .l-vacio {
+    position: absolute; left: 48px; right: 0; top: 150px;
+    text-align: center; font-size: 14px; color: var(--lona-suave); line-height: 1.5; padding: 0 16px;
+    pointer-events: none;
+  }
+  .bloque {
+    pointer-events: auto;
+    position: absolute;
+    padding: 6px 10px 6px 12px;
+    border-radius: 10px;
+    --a: .17;
+    background: linear-gradient(rgba(var(--rgb), var(--a)), rgba(var(--rgb), var(--a))), var(--tinta);
+    border: 1px solid rgba(var(--rgb), .34);
+    border-left: 4px solid rgb(var(--rgb));
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .18s, box-shadow .18s, background .18s, opacity .3s;
+  }
+  .bloque.compacto { padding-top: 2px; padding-bottom: 2px; display: flex; align-items: center; }
+  .bloque:active { transform: scale(.985); }
+  @media (hover: hover) {
+    .bloque:hover {
+      transform: translateX(5px);
+      --a: .27;
+      box-shadow: -5px 0 0 rgb(var(--rgb)), 0 10px 26px rgba(0, 0, 0, .4);
+    }
+  }
+  .bloque.activo {
+    z-index: 3;
+    --a: .32;
+    box-shadow: 0 0 0 1.5px var(--lona), 0 8px 24px rgba(var(--rgb), .35);
+  }
+  .bloque.pasado { opacity: .5; }
+  .bloque.hecha { opacity: .42; }
+  .bloque.hecha .b-titulo, .bloque.hecha .b-una { text-decoration: line-through; }
+  .b-titulo { font-weight: 700; font-size: 15px; line-height: 1.2; padding-right: 30px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .b-sub { font-size: 12px; color: var(--lona-suave); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .b-una { font-weight: 600; font-size: 13px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 4px; }
+  .b-h { color: var(--lona-suave); font-weight: 500; margin-right: 6px; font-variant-numeric: tabular-nums; }
+  .b-check {
+    position: absolute; top: 5px; right: 6px;
+    width: 26px; height: 26px; border-radius: 8px;
+    border: 2px solid rgb(var(--rgb));
+    display: grid; place-items: center;
+    font-size: 14px; color: var(--tinta);
+  }
+  .b-check::after { content: ''; position: absolute; inset: -9px; }
+  .bloque.hecha .b-check { background: rgb(var(--rgb)); }
+  .l-ahora { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--cuerda); z-index: 6; pointer-events: none; }
+  .l-ahora span {
+    position: absolute; left: 0; top: -11px;
+    background: var(--cuerda); color: #fff;
+    font-size: 11px; font-weight: 700; padding: 2px 5px; border-radius: 5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .l-ahora::before { content: ''; position: absolute; left: 44px; top: -6px; width: 10px; height: 10px; border-radius: 50%; background: var(--cuerda); }
+  .linea.anima .bloque { animation: entra .55s cubic-bezier(.2, .9, .25, 1) both; animation-delay: calc(var(--i) * 55ms); }
+  @keyframes entra { from { opacity: 0; transform: translateX(-18px) scaleY(.7); transform-origin: top left; } }
+
+  .dia-notas { padding: 18px 14px 0; }
+
+  /* Cabecera del panel del calendario */
+  .titulo-dia-fila { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .ver-dia {
+    flex: none; font-size: 12px; font-weight: 700;
+    padding: 8px 12px; border-radius: 999px;
+    border: 1px solid var(--tinta-3); color: var(--lona);
+  }
+  .ver-dia:active { background: var(--tinta-3); }
+  .tarea .editar { color: var(--lona-suave); font-size: 16px; padding: 2px 6px; min-width: 32px; min-height: 32px; }
+  .tarea .editar:active { color: var(--oro); }
+
+  /* Hoja de edición */
+  .hoja-overlay { position: fixed; inset: 0; background: rgba(9, 13, 18, .65); backdrop-filter: blur(3px); z-index: 70; display: none; }
+  .hoja-overlay.abierta { display: block; }
+  .hoja {
+    position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto;
+    width: 100%; max-width: 460px; max-height: 92dvh; overflow-y: auto;
+    background: var(--tinta-2);
+    border-radius: 20px 20px 0 0;
+    z-index: 80;
+    padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
+    display: none; flex-direction: column; gap: 12px;
+    animation: subir .25s ease both;
+  }
+  .hoja.abierta { display: flex; }
+  .hoja-asa { width: 40px; height: 4px; border-radius: 4px; background: var(--tinta-3); margin: 0 auto 2px; flex: none; }
+  .hoja h2 { font-family: var(--display); font-size: 22px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 400; color: var(--oro); }
+  .hoja input[type=text], .hoja input[type=date], .hoja input[type=time], .hoja select, .hoja textarea {
+    width: 100%; min-width: 0;
+    background: var(--tinta); border: 1px solid var(--tinta-3); border-radius: 10px;
+    padding: 12px; font-family: var(--cuerpo); font-size: 16px; color: var(--lona);
+    color-scheme: dark;
+  }
+  .hoja textarea { resize: none; line-height: 1.4; }
+  .hoja label { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; font-size: 13px; font-weight: 600; color: var(--lona-suave); }
+  .h-fila { display: flex; gap: 10px; align-items: flex-end; }
+  .h-sin-hora { flex: none; height: 46px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--tinta-3); font-size: 13px; font-weight: 700; color: var(--lona-suave); }
+  .h-cats { display: flex; gap: 8px; }
+  .h-cats button { flex: 1; padding: 12px 6px; border-radius: 10px; border: 1.5px solid var(--tinta-3); background: var(--tinta); font-weight: 700; font-size: 14px; }
+  .h-cats button.sel { background: rgba(var(--rgb), .22); border-color: rgb(var(--rgb)); }
+  .h-error { color: var(--cuerda); font-size: 14px; font-weight: 600; }
+  .h-error:empty { display: none; }
+  .h-botones { display: flex; gap: 8px; margin-top: 2px; }
+  .h-botones button { flex: 1; padding: 14px 8px; border-radius: 10px; font-weight: 700; font-size: 15px; border: 1px solid var(--tinta-3); background: var(--tinta); }
+  .h-botones .pri { flex: 1.5; background: var(--cuerda); border-color: var(--cuerda); color: #fff; }
+  .h-botones .armado { background: var(--cuerda); border-color: var(--cuerda); color: #fff; }
+  .h-botones button:active { filter: brightness(.85); }
+
+  /* Barra inferior */
+  .tabs {
+    position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto;
+    max-width: 460px; z-index: 40;
+    display: grid; grid-template-columns: 1fr 88px 1fr; align-items: end;
+    background: rgba(27, 36, 48, .94); backdrop-filter: blur(12px);
+    border-top: 1px solid var(--tinta-3);
+    padding: 6px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+  .tab, .tab-centro { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: var(--lona-suave); }
+  .tab { padding: 6px 4px; border-radius: 12px; }
+  .tab-centro { padding-bottom: 6px; }
+  .tab svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tab.activa { color: var(--oro); }
+  .tab:active { transform: scale(.94); }
+  .boton-esquina {
+    width: 58px; height: 58px; margin-top: -28px;
+    border-radius: 50%; background: var(--cuerda); color: #fff;
+    display: grid; place-items: center;
+    box-shadow: 0 6px 22px rgba(226, 59, 78, .5), 0 0 0 5px var(--tinta);
+    transition: transform .15s;
+  }
+  .boton-esquina:active { transform: scale(.92); }
+  .campana { font-size: 26px; line-height: 1; }
 </style>
 </head>
 <body>
 
+<div class="vista" id="vista-dia">
+  <header class="cab-dia">
+    <div class="mes-bloque">
+      <div class="dia-sup" id="dia-sup"></div>
+      <h1 id="dia-titulo"></h1>
+    </div>
+    <div class="nav-mes">
+      <button class="txt" id="dia-hoy" hidden>Hoy</button>
+      <button id="dia-prev" aria-label="Día anterior">‹</button>
+      <button id="dia-sig" aria-label="Día siguiente">›</button>
+    </div>
+  </header>
+
+  <div class="ahora-caja">
+    <div class="ahora" id="ahora" aria-live="off"></div>
+    <button class="dia-nuevo" id="dia-nuevo" aria-label="Añadir tarea">+</button>
+  </div>
+
+  <div class="sin-hora" id="sin-hora" hidden></div>
+
+  <div class="linea" id="linea"></div>
+
+  <section class="dia-notas">
+    <div class="seccion-titulo">Notas</div>
+    <div class="lista" id="dia-lista-notas"></div>
+    <div class="fila-añadir">
+      <input id="dia-input-nota" type="text" placeholder="Nueva nota…" autocomplete="off" />
+      <button id="dia-btn-nota" aria-label="Añadir nota">+</button>
+    </div>
+  </section>
+</div>
+
+<div class="vista" id="vista-cal" hidden>
 <header>
   <div class="titulo-esquina">
     <img class="logo-esquina" id="logo" alt="La Esquina">
@@ -533,13 +752,12 @@
 <div class="rejilla" id="rejilla"></div>
 <div class="leyenda">
   <span><i class="cat-deporte"></i>Deporte</span>
-  <span><i class="cat-boda"></i>Boda</span>
   <span><i class="cat-laboral"></i>Laboral</span>
   <span><i class="cat-otros"></i>Otros</span>
 </div>
 
 <section class="panel-dia" id="panel-dia">
-  <h2 id="titulo-dia"></h2>
+  <div class="titulo-dia-fila"><h2 id="titulo-dia"></h2><button class="ver-dia" id="abrir-en-dia">Ver en Mi día</button></div>
 
   <div>
     <div class="seccion-titulo">Tareas</div>
@@ -571,10 +789,58 @@
     <input type="file" id="archivo-importar" accept=".json,application/json" hidden />
   </div>
 </section>
+</div>
 
-<button class="boton-esquina" id="abrir-esquina">
-  <span class="campana">🔔</span> La Esquina
-</button>
+<nav class="tabs" aria-label="Vistas">
+  <button class="tab activa" id="tab-dia" data-vista="dia" aria-current="page">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    <span>Mi día</span>
+  </button>
+  <div class="tab-centro">
+    <button class="boton-esquina" id="abrir-esquina" aria-label="Abrir La Esquina, el chat con Claude"><span class="campana">🔔</span></button>
+    <span>La Esquina</span>
+  </div>
+  <button class="tab" id="tab-cal" data-vista="cal">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+    <span>Calendario</span>
+  </button>
+</nav>
+
+<div class="hoja-overlay" id="hoja-overlay"></div>
+<div class="hoja" id="hoja" role="dialog" aria-label="Tarea">
+  <div class="hoja-asa"></div>
+  <h2 id="hoja-titulo">Nueva tarea</h2>
+  <input id="h-texto" type="text" placeholder="¿Qué hay que hacer?" autocomplete="off" />
+  <div class="h-cats" id="h-cats">
+    <button type="button" class="c-deporte" data-cat="deporte">Deporte</button>
+    <button type="button" class="c-laboral" data-cat="laboral">Laboral</button>
+    <button type="button" class="c-otros" data-cat="otros">Otros</button>
+  </div>
+  <label>Día<input id="h-fecha" type="date" /></label>
+  <div class="h-fila">
+    <label>Empieza<input id="h-ini" type="time" step="300" /></label>
+    <label>Acaba<input id="h-fin" type="time" step="300" /></label>
+    <button type="button" class="h-sin-hora" id="h-sin-hora">Sin hora</button>
+  </div>
+  <label>Aviso en el móvil
+    <select id="h-alarma">
+      <option value="">Sin aviso</option>
+      <option value="0">A la hora</option>
+      <option value="5">5 min antes</option>
+      <option value="10">10 min antes</option>
+      <option value="15">15 min antes</option>
+      <option value="30">30 min antes</option>
+      <option value="60">1 hora antes</option>
+    </select>
+  </label>
+  <label>Detalle<textarea id="h-detalle" rows="3" placeholder="Notas de la tarea (opcional)"></textarea></label>
+  <div class="h-error" id="h-error" role="alert"></div>
+  <div class="h-botones">
+    <button type="button" id="h-borrar">Borrar</button>
+    <button type="button" id="h-hecho">Marcar hecha</button>
+    <button type="button" class="pri" id="h-guardar">Guardar</button>
+  </div>
+</div>
 
 <div class="esquina-overlay" id="esquina-overlay"></div>
 <div class="esquina" id="esquina" role="dialog" aria-label="Chat con Claude">
@@ -669,6 +935,8 @@
         datos.tasks = p.tasks || {};
         datos.notes = p.notes || {};
         datos.chat = Array.isArray(p.chat) ? p.chat : [];
+        // La categoría 'boda' ya no existe: lo que tenía pasa a 'otros'
+        Object.keys(datos.tasks).forEach(k => (datos.tasks[k] || []).forEach(t => { if (!CATS.includes(t.cat)) t.cat = 'otros'; }));
       }
     } catch (e) { /* primera vez: no hay nada guardado */ }
     cargado = true;
@@ -722,22 +990,32 @@
         p.className = 'punto';
         btn.appendChild(p);
       }
-      tareas.slice(0, 3).forEach(t => {
+      // Con el plan cargado hay muchas tareas por día: en la rejilla van primero las que
+      // has apuntado tú, luego deporte y laboral, y sin repetir nombres.
+      const orden = { deporte: 0, laboral: 1, otros: 2 };
+      const vistos = new Set();
+      const chips = tareas
+        .map((t, i) => ({ t, i, p: (t.src === 'plan' ? 10 : 0) + (orden[t.cat] ?? 2) }))
+        .sort((x, y) => x.p - y.p || x.i - y.i)
+        .filter(x => !vistos.has(x.t.text) && vistos.add(x.t.text))
+        .map(x => x.t);
+      chips.slice(0, 3).forEach(t => {
         const c = document.createElement('span');
-        c.className = 'chip cat-' + (t.cat || 'otros') + (t.done ? ' hecha' : '');
+        c.className = 'chip cat-' + (CATS.includes(t.cat) ? t.cat : 'otros') + (t.done ? ' hecha' : '');
         c.textContent = t.text;
         btn.appendChild(c);
       });
-      if (tareas.length > 3) {
+      if (chips.length > 3) {
         const m = document.createElement('span');
         m.className = 'chip mas';
-        m.textContent = '+' + (tareas.length - 3);
+        m.textContent = '+' + (chips.length - 3);
         btn.appendChild(m);
       }
       btn.addEventListener('click', () => { seleccionado = k; render(); });
       rejilla.appendChild(btn);
     }
     renderDia();
+    renderMiDia();
   }
 
   function renderDia() {
@@ -755,33 +1033,39 @@
     const notas = datos.notes[seleccionado] || [];
 
     if (!tareas.length) lt.innerHTML = '<div class="vacio-msg">Sin tareas. Añade una abajo o pídesela a La Esquina.</div>';
-    tareas.forEach(t => {
-      const cat = t.cat || 'otros';
-      const el = document.createElement('div');
-      el.className = 'tarea b-' + cat + (t.done ? ' hecha' : '');
-      el.innerHTML =
-        '<button class="check" aria-label="Marcar tarea">' + (t.done ? '✓' : '') + '</button>' +
-        '<div class="cuerpo-tarea">' +
-          '<span class="texto">' + (t.time ? '<span class="hora">' + esc(etiquetaHora(t)) + '</span>' : '') + esc(t.text) + (t.detail ? ' <span class="chevron">▾</span>' : '') + '</span>' +
-          (t.detail ? '<div class="detalle">' + esc(t.detail) + '</div>' : '') +
-        '</div>' +
-        '<button class="borrar" aria-label="Borrar tarea">✕</button>';
-      el.querySelector('.check').addEventListener('click', () => {
-        t.done = !t.done; guardar(); render();
-      });
-      if (t.detail) {
-        el.querySelector('.cuerpo-tarea').addEventListener('click', () => {
-          el.classList.toggle('abierta');
-        });
-      }
-      el.querySelector('.borrar').addEventListener('click', () => {
-        datos.tasks[seleccionado] = tareas.filter(x => x.id !== t.id);
-        if (!datos.tasks[seleccionado].length) delete datos.tasks[seleccionado];
-        guardar(); render();
-      });
-      lt.appendChild(el);
-    });
+    tareas.forEach(t => lt.appendChild(crearFilaTarea(t, seleccionado)));
+    pintarNotas(seleccionado, ln);
+  }
 
+  // Fila de tarea (la usan el calendario y la lista "Sin hora" de Mi día)
+  function crearFilaTarea(t, fecha) {
+    const cat = CATS.includes(t.cat) ? t.cat : 'otros';
+    const el = document.createElement('div');
+    el.className = 'tarea b-' + cat + (t.done ? ' hecha' : '');
+    el.innerHTML =
+      '<button class="check" aria-label="Marcar tarea">' + (t.done ? '✓' : '') + '</button>' +
+      '<div class="cuerpo-tarea">' +
+        '<span class="texto">' + (t.time ? '<span class="hora">' + esc(etiquetaHora(t)) + '</span>' : '') + esc(t.text) + (t.detail ? ' <span class="chevron">▾</span>' : '') + '</span>' +
+        (t.detail ? '<div class="detalle">' + esc(t.detail) + '</div>' : '') +
+      '</div>' +
+      '<button class="editar" aria-label="Editar tarea">✎</button>' +
+      '<button class="borrar" aria-label="Borrar tarea">✕</button>';
+    el.querySelector('.check').addEventListener('click', () => { t.done = !t.done; guardar(); render(); });
+    if (t.detail) {
+      el.querySelector('.cuerpo-tarea').addEventListener('click', () => { el.classList.toggle('abierta'); });
+    }
+    el.querySelector('.editar').addEventListener('click', () => abrirHoja(t, fecha));
+    el.querySelector('.borrar').addEventListener('click', () => {
+      datos.tasks[fecha] = (datos.tasks[fecha] || []).filter(x => x.id !== t.id);
+      if (!datos.tasks[fecha].length) delete datos.tasks[fecha];
+      guardar(); render();
+    });
+    return el;
+  }
+
+  function pintarNotas(fecha, ln) {
+    const notas = datos.notes[fecha] || [];
+    ln.innerHTML = '';
     if (!notas.length) ln.innerHTML = '<div class="vacio-msg">Sin notas para este día.</div>';
     notas.forEach(n => {
       const el = document.createElement('div');
@@ -790,8 +1074,8 @@
         '<span class="texto">' + esc(n.text) + '</span>' +
         '<button class="borrar" aria-label="Borrar nota">✕</button>';
       el.querySelector('.borrar').addEventListener('click', () => {
-        datos.notes[seleccionado] = notas.filter(x => x.id !== n.id);
-        if (!datos.notes[seleccionado].length) delete datos.notes[seleccionado];
+        datos.notes[fecha] = (datos.notes[fecha] || []).filter(x => x.id !== n.id);
+        if (!datos.notes[fecha].length) delete datos.notes[fecha];
         guardar(); render();
       });
       ln.appendChild(el);
@@ -799,7 +1083,7 @@
   }
 
   // ── Añadir manual ─────────────────────────────────
-  const CATS = ['deporte', 'boda', 'laboral', 'otros'];
+  const CATS = ['deporte', 'laboral', 'otros'];
   let catNueva = 'otros';
   const catSelI = document.getElementById('cat-sel-i');
   document.getElementById('cat-sel').addEventListener('click', () => {
@@ -919,7 +1203,7 @@
     return 'Asistente del calendario "La Esquina". Usuario: Pablo (español, boxeador, experiencia en fitness).\n' +
       'HOY: ' + hoyStr + '\n' +
       'CALENDARIO (JSON, próximas 3 semanas):\n' + contextoCalendario() + '\n\n' +
-      'Tarea: {id,text,done,cat,detail,time,end,alarm}. cat: deporte|boda|laboral|otros. detail: anotación opcional. time/end: hora de inicio y fin "HH:MM" (opcionales). alarm: minutos de antelación del aviso en el móvil (0 = a la hora; solo si hay time).\n' +
+      'Tarea: {id,text,done,cat,detail,time,end,alarm}. cat: deporte|laboral|otros (la categoría boda ya no existe: usa otros). detail: anotación opcional. time/end: hora de inicio y fin "HH:MM" (opcionales). alarm: minutos de antelación del aviso en el móvil (0 = a la hora; solo si hay time).\n' +
       'Nota: {id,text}.\n\n' +
       'MENSAJE: "' + mensajeUsuario.replace(/"/g, '\\"') + '"\n\n' +
       'Responde SOLO JSON:\n' +
@@ -1184,6 +1468,411 @@
     btnMic.addEventListener('pointerleave', parar);
     btnMic.addEventListener('contextmenu', e => e.preventDefault());
   }
+
+  // ══════════════════════════════════════════════════════════════
+  //  MI DÍA — línea de tiempo: cada bloque mide lo que dura
+  // ══════════════════════════════════════════════════════════════
+  const PX_H = 72;        // altura de una hora en pantalla
+  const DUR_DEF = 60;     // duración de una tarea con hora y sin fin (la misma que usa el .ics)
+  let diaVista = clave(new Date());
+  let siguiendoHoy = true;
+  let animarLinea = true;
+  let vistaActiva = 'dia';
+  let lineaH0 = 7, lineaH1 = 22;
+  let bloquesDia = [];
+  let lineaAhoraEl = null;
+  let ultMin = -1;
+
+  const elLinea = document.getElementById('linea');
+  const elAhora = document.getElementById('ahora');
+  const elSinHora = document.getElementById('sin-hora');
+
+  function aMin(h) { const p = h.split(':'); return Number(p[0]) * 60 + Number(p[1]); }
+  function deMin(m) {
+    m = Math.max(0, Math.min(Math.round(m), 1439));
+    return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  }
+  function finMin(t) {
+    const ini = aMin(t.time);
+    const fin = t.end ? aMin(t.end) : ini + DUR_DEF;
+    return Math.min(Math.max(fin, ini + 15), 1440);
+  }
+  function durTexto(min) {
+    const h = Math.floor(min / 60), m = min % 60;
+    if (!h) return m + ' min';
+    return m ? h + ' h ' + m + ' min' : h + ' h';
+  }
+  function cuenta(seg) {
+    seg = Math.max(0, Math.ceil(seg));
+    const h = Math.floor(seg / 3600), m = Math.floor(seg % 3600 / 60), s2 = seg % 60;
+    const mm = String(m).padStart(2, '0'), ss = String(s2).padStart(2, '0');
+    return h ? h + ':' + mm + ':' + ss : mm + ':' + ss;
+  }
+  function enTexto(seg) { return 'en ' + durTexto(Math.max(1, Math.ceil(seg / 60))); }
+  function ahoraSeg() { const n = new Date(); return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds(); }
+
+  // Reparte en columnas los bloques que se solapan para que no se tapen
+  function colocar(bloques) {
+    const res = [];
+    let grupo = [];
+    let finGrupo = -1;
+    let cols = [];
+    const cerrar = () => {
+      const n = Math.max(...grupo.map(x => x.col)) + 1;
+      grupo.forEach(x => { x.n = n; });
+      res.push(...grupo);
+      grupo = []; cols = []; finGrupo = -1;
+    };
+    bloques.forEach(b => {
+      if (grupo.length && b.ini >= finGrupo) cerrar();
+      let c = cols.findIndex(f => f <= b.ini);
+      if (c === -1) { c = cols.length; cols.push(0); }
+      cols[c] = b.fin;
+      b.col = c;
+      grupo.push(b);
+      finGrupo = Math.max(finGrupo, b.fin);
+    });
+    if (grupo.length) cerrar();
+    return res;
+  }
+
+  function renderMiDia() {
+    const hoyK = clave(new Date());
+    const [a, m, d] = diaVista.split('-').map(Number);
+    const f = new Date(a, m - 1, d);
+    const h0 = new Date(); h0.setHours(0, 0, 0, 0);
+    const dif = Math.round((f - h0) / 864e5);
+    const rel = dif === 0 ? 'Hoy' : dif === 1 ? 'Mañana' : dif === -1 ? 'Ayer' : '';
+    document.getElementById('dia-sup').textContent = (rel ? rel + ', ' : '') + d + ' de ' + MESES[m - 1].toLowerCase();
+    document.getElementById('dia-titulo').textContent = DIAS_SEM[f.getDay()];
+    document.getElementById('dia-hoy').hidden = diaVista === hoyK;
+
+    const todas = datos.tasks[diaVista] || [];
+    const conHora = ordenar(todas.filter(t => t.time));
+    const sinHora = todas.filter(t => !t.time);
+
+    // Tareas sin hora, arriba
+    elSinHora.innerHTML = '';
+    if (sinHora.length) {
+      const tit = document.createElement('div');
+      tit.className = 'seccion-titulo';
+      tit.textContent = 'Sin hora';
+      const lista = document.createElement('div');
+      lista.className = 'lista';
+      sinHora.forEach(t => lista.appendChild(crearFilaTarea(t, diaVista)));
+      elSinHora.appendChild(tit);
+      elSinHora.appendChild(lista);
+    }
+    elSinHora.hidden = !sinHora.length;
+
+    // Línea de tiempo
+    bloquesDia = colocar(conHora.map(t => ({ t, ini: aMin(t.time), fin: finMin(t) })));
+    let h0h = 7, h1h = 22;
+    bloquesDia.forEach(x => { h0h = Math.min(h0h, Math.floor(x.ini / 60)); h1h = Math.max(h1h, Math.ceil(x.fin / 60)); });
+    lineaH0 = h0h; lineaH1 = h1h;
+    elLinea.style.height = (h1h - h0h) * PX_H + 'px';
+    elLinea.classList.toggle('anima', animarLinea);
+    elLinea.innerHTML = '';
+
+    for (let h = h0h; h <= h1h; h++) {
+      const fila = document.createElement('div');
+      fila.className = 'l-hora';
+      fila.style.top = (h - h0h) * PX_H + 'px';
+      fila.innerHTML = '<span>' + String(h % 24).padStart(2, '0') + ':00</span>';
+      elLinea.appendChild(fila);
+    }
+    const cont = document.createElement('div');
+    cont.className = 'l-bloques';
+    elLinea.appendChild(cont);
+
+    bloquesDia.forEach((x, i) => {
+      const t = x.t;
+      const cat = CATS.includes(t.cat) ? t.cat : 'otros';
+      const alt = Math.max((x.fin - x.ini) / 60 * PX_H - 3, 20);
+      const el = document.createElement('div');
+      el.className = 'bloque c-' + cat + (alt < 44 ? ' compacto' : '') + (t.done ? ' hecha' : '');
+      el.tabIndex = 0;
+      el.setAttribute('role', 'button');
+      el.setAttribute('aria-label', t.text + ', ' + t.time + (t.end ? ' a ' + t.end : ''));
+      el.style.top = ((x.ini - h0h * 60) / 60 * PX_H) + 'px';
+      el.style.height = alt + 'px';
+      el.style.left = (x.col / x.n * 100) + '%';
+      el.style.width = 'calc(' + (100 / x.n) + '% - 4px)';
+      el.style.setProperty('--i', i);
+      const campana = typeof t.alarm === 'number' ? ' 🔔' : '';
+      const rango = t.time + (t.end ? '–' + t.end : '');
+      el.innerHTML =
+        (alt >= 34 ? '<button class="b-check" aria-label="Marcar como hecha">' + (t.done ? '✓' : '') + '</button>' : '') +
+        (alt < 44
+          ? '<div class="b-una"><span class="b-h">' + t.time + '</span>' + esc(t.text) + campana + '</div>'
+          : '<div class="b-titulo">' + esc(t.text) + '</div><div class="b-sub">' + rango + ' · ' + durTexto(x.fin - x.ini) + campana + '</div>');
+      const chk = el.querySelector('.b-check');
+      if (chk) chk.addEventListener('click', ev => { ev.stopPropagation(); t.done = !t.done; guardar(); render(); });
+      el.addEventListener('click', ev => { ev.stopPropagation(); abrirHoja(t, diaVista); });
+      el.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); abrirHoja(t, diaVista); }
+      });
+      x.el = el;
+      cont.appendChild(el);
+    });
+
+    if (!bloquesDia.length) {
+      const v = document.createElement('div');
+      v.className = 'l-vacio';
+      v.textContent = 'Día sin plan. Toca una hora para añadir algo, o importa tu plan desde Calendario.';
+      elLinea.appendChild(v);
+    }
+    lineaAhoraEl = document.createElement('div');
+    lineaAhoraEl.className = 'l-ahora';
+    lineaAhoraEl.hidden = true;
+    lineaAhoraEl.innerHTML = '<span></span>';
+    elLinea.appendChild(lineaAhoraEl);
+
+    const primera = animarLinea;
+    animarLinea = false;
+    actualizarAhora(true);
+    if (primera && vistaActiva === 'dia') irAAhora();
+  }
+
+  // Toca un hueco de la línea de tiempo: nueva tarea a esa hora
+  elLinea.addEventListener('click', ev => {
+    if (ev.target.closest('.bloque')) return;
+    const y = ev.clientY - elLinea.getBoundingClientRect().top;
+    let min = Math.round((lineaH0 * 60 + y / PX_H * 60) / 15) * 15;
+    min = Math.max(0, Math.min(min, 23 * 60 + 30));
+    abrirHoja(null, diaVista, { time: deMin(min), end: deMin(min + 30), alarm: 0 });
+  });
+
+  function irAAhora() {
+    const base = elLinea.getBoundingClientRect().top + window.scrollY;
+    let y;
+    if (diaVista === clave(new Date())) y = (ahoraSeg() / 60 - lineaH0 * 60) / 60 * PX_H;
+    else y = bloquesDia.length ? (bloquesDia[0].ini - lineaH0 * 60) / 60 * PX_H - 20 : 0;
+    window.scrollTo(0, Math.max(0, base + y - 230));
+  }
+
+  // Estado "ahora": cambia cada segundo (reloj) y cada minuto (línea y bloques)
+  function actualizarAhora(forzar) {
+    const esHoy = diaVista === clave(new Date());
+    const seg = ahoraSeg();
+    const min = Math.floor(seg / 60);
+    if (forzar || min !== ultMin) {
+      ultMin = min;
+      if (lineaAhoraEl) {
+        const dentro = esHoy && min >= lineaH0 * 60 && min <= lineaH1 * 60;
+        lineaAhoraEl.hidden = !dentro;
+        if (dentro) {
+          lineaAhoraEl.style.top = ((seg / 60 - lineaH0 * 60) / 60 * PX_H) + 'px';
+          lineaAhoraEl.firstChild.textContent = deMin(min);
+        }
+      }
+      bloquesDia.forEach(x => {
+        x.el.classList.toggle('activo', esHoy && !x.t.done && min >= x.ini && min < x.fin);
+        x.el.classList.toggle('pasado', esHoy && min >= x.fin);
+      });
+    }
+    pintarAhora(esHoy, seg);
+  }
+
+  function pintarAhora(esHoy, seg) {
+    const vivos = bloquesDia.filter(x => !x.t.done);
+    let html = '';
+    let cat = '';
+    if (!esHoy) {
+      if (bloquesDia.length) {
+        const fin = Math.max(...bloquesDia.map(x => x.fin));
+        html = '<div class="ah-resumen"><b>' + bloquesDia.length + (bloquesDia.length === 1 ? ' bloque' : ' bloques') + '</b> de ' + deMin(bloquesDia[0].ini) + ' a ' + deMin(fin) + '</div>';
+      } else {
+        html = '<div class="ah-resumen">Sin plan para este día. Toca una hora para añadir algo.</div>';
+      }
+    } else {
+      const actual = vivos.find(x => seg >= x.ini * 60 && seg < x.fin * 60);
+      const sig = vivos.find(x => x.ini * 60 > seg);
+      const sigTxt = sig ? 'Siguiente: ' + esc(sig.t.text) + ' a las ' + sig.t.time + ', ' + enTexto(sig.ini * 60 - seg) : '';
+      if (actual) {
+        cat = CATS.includes(actual.t.cat) ? actual.t.cat : 'otros';
+        const prog = Math.min(100, Math.max(0, (seg - actual.ini * 60) / ((actual.fin - actual.ini) * 60) * 100));
+        html =
+          '<div class="ah-fila"><div class="ah-cuenta">' + cuenta(actual.fin * 60 - seg) + '</div>' +
+          '<div class="ah-info"><div class="ah-nombre">' + esc(actual.t.text) + '</div>' +
+          '<div class="ah-rango">' + actual.t.time + (actual.t.end ? ' – ' + actual.t.end : '') + '</div></div></div>' +
+          '<div class="ah-cuerda"><i style="width:' + prog.toFixed(1) + '%"></i></div>' +
+          (sigTxt ? '<div class="ah-sig">' + sigTxt + '</div>' : '');
+      } else if (sig) {
+        html =
+          '<div class="ah-fila"><div class="ah-cuenta ah-espera">' + cuenta(sig.ini * 60 - seg) + '</div>' +
+          '<div class="ah-info"><div class="ah-nombre">Libre hasta las ' + sig.t.time + '</div>' +
+          '<div class="ah-rango">' + esc(sig.t.text) + '</div></div></div>';
+      } else {
+        html = '<div class="ah-resumen">' + (bloquesDia.length ? 'Hoy no queda nada más.' : 'Sin plan para hoy. Toca una hora para añadir algo.') + '</div>';
+      }
+    }
+    elAhora.className = 'ahora' + (cat ? ' c-' + cat : '');
+    if (elAhora.dataset.html !== html) { elAhora.innerHTML = html; elAhora.dataset.html = html; }
+  }
+
+  function tick() {
+    if (document.hidden || vistaActiva !== 'dia') return;
+    const hoyK = clave(new Date());
+    if (siguiendoHoy && diaVista !== hoyK) { diaVista = hoyK; animarLinea = true; renderMiDia(); return; }
+    actualizarAhora(false);
+  }
+  setInterval(tick, 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+
+  // Navegación entre días
+  function irADia(k) {
+    diaVista = k;
+    siguiendoHoy = k === clave(new Date());
+    animarLinea = true;
+    renderMiDia();
+  }
+  function diaDesplazado(n) {
+    const [a, m, d] = diaVista.split('-').map(Number);
+    return clave(new Date(a, m - 1, d + n));
+  }
+  document.getElementById('dia-prev').addEventListener('click', () => irADia(diaDesplazado(-1)));
+  document.getElementById('dia-sig').addEventListener('click', () => irADia(diaDesplazado(1)));
+  document.getElementById('dia-hoy').addEventListener('click', () => irADia(clave(new Date())));
+  document.getElementById('dia-nuevo').addEventListener('click', () => {
+    const n = new Date();
+    let ini = diaVista === clave(n) ? Math.ceil((n.getHours() * 60 + n.getMinutes() + 1) / 15) * 15 : 9 * 60;
+    ini = Math.min(ini, 23 * 60);
+    abrirHoja(null, diaVista, { time: deMin(ini), end: deMin(ini + 30), alarm: 0 });
+  });
+  document.getElementById('dia-btn-nota').addEventListener('click', anadirNotaDia);
+  document.getElementById('dia-input-nota').addEventListener('keydown', e => { if (e.key === 'Enter') anadirNotaDia(); });
+  function anadirNotaDia() {
+    const inp = document.getElementById('dia-input-nota');
+    const txt = inp.value.trim();
+    if (!txt) return;
+    (datos.notes[diaVista] = datos.notes[diaVista] || []).push({ id: uid(), text: txt });
+    inp.value = '';
+    guardar(); render();
+  }
+
+  // ── Pestañas ──────────────────────────────────────
+  function mostrarVista(v) {
+    vistaActiva = v;
+    document.getElementById('vista-dia').hidden = v !== 'dia';
+    document.getElementById('vista-cal').hidden = v !== 'cal';
+    document.querySelectorAll('.tab').forEach(b => {
+      const on = b.dataset.vista === v;
+      b.classList.toggle('activa', on);
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    if (v === 'dia') { animarLinea = true; renderMiDia(); }
+    else { window.scrollTo(0, 0); render(); }
+  }
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => mostrarVista(b.dataset.vista)));
+  document.getElementById('abrir-en-dia').addEventListener('click', () => {
+    diaVista = seleccionado;
+    siguiendoHoy = seleccionado === clave(new Date());
+    mostrarVista('dia');
+  });
+
+  // ── Hoja de edición (crear y editar tareas) ───────
+  const hoja = document.getElementById('hoja');
+  const hojaOv = document.getElementById('hoja-overlay');
+  const H = id => document.getElementById(id);
+  let edicion = null;       // { t, fecha }: t es null al crear
+  let catHoja = 'otros';
+  let borrarArmado = false;
+
+  function pintarCatHoja() {
+    document.querySelectorAll('#h-cats button').forEach(b => b.classList.toggle('sel', b.dataset.cat === catHoja));
+  }
+  document.querySelectorAll('#h-cats button').forEach(b => b.addEventListener('click', () => { catHoja = b.dataset.cat; pintarCatHoja(); }));
+  function ajustarAlarma() {
+    H('h-alarma').disabled = !H('h-ini').value;
+    if (!H('h-ini').value) H('h-alarma').value = '';
+  }
+  H('h-ini').addEventListener('input', ajustarAlarma);
+  H('h-sin-hora').addEventListener('click', () => { H('h-ini').value = ''; H('h-fin').value = ''; ajustarAlarma(); });
+
+  function abrirHoja(t, fecha, pre) {
+    edicion = { t: t || null, fecha };
+    borrarArmado = false;
+    const p = t || pre || {};
+    H('hoja-titulo').textContent = t ? 'Editar tarea' : 'Nueva tarea';
+    H('h-texto').value = t ? t.text : '';
+    catHoja = t ? (CATS.includes(t.cat) ? t.cat : 'otros') : 'otros';
+    pintarCatHoja();
+    H('h-fecha').value = fecha;
+    H('h-ini').value = p.time || '';
+    H('h-fin').value = p.end || '';
+    H('h-alarma').value = typeof p.alarm === 'number' ? String(p.alarm) : '';
+    ajustarAlarma();
+    if (typeof p.alarm === 'number') H('h-alarma').value = String(p.alarm);
+    H('h-detalle').value = t ? (t.detail || '') : '';
+    H('h-error').textContent = '';
+    H('h-borrar').style.display = t ? '' : 'none';
+    H('h-borrar').textContent = 'Borrar';
+    H('h-borrar').classList.remove('armado');
+    H('h-hecho').style.display = t ? '' : 'none';
+    H('h-hecho').textContent = t && t.done ? 'Marcar pendiente' : 'Marcar hecha';
+    hojaOv.classList.add('abierta');
+    hoja.classList.add('abierta');
+    if (!t) setTimeout(() => H('h-texto').focus(), 60);
+  }
+  function cerrarHoja() {
+    hojaOv.classList.remove('abierta');
+    hoja.classList.remove('abierta');
+    edicion = null;
+  }
+  hojaOv.addEventListener('click', cerrarHoja);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && hoja.classList.contains('abierta')) cerrarHoja(); });
+  H('h-texto').addEventListener('keydown', e => { if (e.key === 'Enter') guardarHoja(); });
+
+  function guardarHoja() {
+    if (!edicion) return;
+    const err = H('h-error');
+    const texto = H('h-texto').value.trim();
+    const ini = normHora(H('h-ini').value);
+    const fin = normHora(H('h-fin').value);
+    const fecha = H('h-fecha').value;
+    const al = H('h-alarma').value;
+    err.textContent = '';
+    if (!texto) { err.textContent = 'Escribe qué hay que hacer.'; return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) { err.textContent = 'Elige un día.'; return; }
+    if (!ini && fin) { err.textContent = 'Pon también la hora de inicio.'; return; }
+    if (ini && fin && fin <= ini) { err.textContent = 'La hora de fin tiene que ser posterior a la de inicio.'; return; }
+    const campos = camposHora({ time: ini, end: fin, alarm: al === '' ? undefined : al });
+    const base = { text: texto, cat: catHoja, detail: H('h-detalle').value.trim() };
+    if (edicion.t) {
+      const t = edicion.t;
+      Object.assign(t, base);
+      delete t.time; delete t.end; delete t.alarm;
+      Object.assign(t, campos);
+      if (fecha !== edicion.fecha) {
+        datos.tasks[edicion.fecha] = (datos.tasks[edicion.fecha] || []).filter(x => x.id !== t.id);
+        if (!datos.tasks[edicion.fecha].length) delete datos.tasks[edicion.fecha];
+        (datos.tasks[fecha] = datos.tasks[fecha] || []).push(t);
+      }
+    } else {
+      (datos.tasks[fecha] = datos.tasks[fecha] || []).push(Object.assign({ id: uid(), done: false }, base, campos));
+    }
+    guardar(); cerrarHoja(); render();
+  }
+  H('h-guardar').addEventListener('click', guardarHoja);
+  H('h-hecho').addEventListener('click', () => {
+    if (!edicion || !edicion.t) return;
+    edicion.t.done = !edicion.t.done;
+    guardar(); cerrarHoja(); render();
+  });
+  H('h-borrar').addEventListener('click', () => {
+    if (!edicion || !edicion.t) return;
+    if (!borrarArmado) {
+      borrarArmado = true;
+      H('h-borrar').textContent = '¿Seguro? Toca otra vez';
+      H('h-borrar').classList.add('armado');
+      return;
+    }
+    const f = edicion.fecha;
+    datos.tasks[f] = (datos.tasks[f] || []).filter(x => x.id !== edicion.t.id);
+    if (!datos.tasks[f].length) delete datos.tasks[f];
+    guardar(); cerrarHoja(); render();
+  });
 
   // ── Plan y avisos: importar, copia de seguridad y alarmas (.ics) ──
   const avisoEl = document.getElementById('herramientas-aviso');
